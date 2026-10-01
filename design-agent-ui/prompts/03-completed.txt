@@ -1,0 +1,15 @@
+Use case: ui-mockup.
+Asset type: A single high-fidelity desktop web application UI design screen for a minimal Design-to-Code Agent product, suitable for a frontend developer to implement.
+Style: clean, restrained, practical engineering tool. Follow the source wireframe's white surfaces, pale cool gray canvas, indigo primary action, subtle dividers, compact header and rounded cards. Crisp Simplified Chinese typography, consistent 8px spacing, no decorative hero illustration. Landscape canvas approximately 1600x1000. Full front-facing flat screen; no physical laptop, no perspective, no desktop background. Keep all important controls fully visible with generous but efficient spacing.
+Reference is an interaction prototype, used as information architecture and visual style reference, not a target for pixel-perfect editing. Remove its top prototype simulation toolbar. Retain a discreet "示例界面" label in the product header, because task data are illustrative.
+Do not invent extra modules: no sidebar dashboard, chatbot, billing, model picker, agent team, charts, code editor, deployment button, success percentage or remaining-time estimate. Keep product name "Design Agent", "MVP" badge and consistent simple D-arrow mark. Realistic, implementable components, readable Chinese labels, single screen per image.
+Screen: Completed task detail. Image 1 is the reference. Keep the same application header, page layout, typography and card structure as the running view.
+Title: "订单筛选开发任务"; status pill "已完成"; small label "task-001 · 示例任务"; summary "开发任务已结束，检查与产物请见下方。"
+Inputs summary "订单管理-设计稿.png · 订单筛选需求.md", "example/order-console / main".
+Two-column work area: left "执行阶段", exactly "解析材料", "准备仓库", "理解与规划", "开发代码", "检查与交付", all marked "已完成". Right "任务动态", 5 concise sample event rows ending "10:03:10 检查结束，生成分支信息与报告。", collapsed "本次需求".
+Below is a compact full-width "开发结果" card. Discreet tag "示例结果".
+Summary "已实现订单状态筛选、重置，以及筛选变化后回到第一页。"
+Four clearly readable check rows/chips: "类型检查：通过", "Lint：通过", "构建：通过", "交互 / 视觉：未执行". Do not make unexecuted checks look passed.
+Changed files "src/pages/orders/index.tsx", "src/hooks/useTableQuery.ts".
+Branch line: "agent/task-001 · 未推送". NO remote branch link because it has not been pushed. Button "下载报告". Secondary footer button "返回新建任务". The whole screen is illustrative design data, not proof of actual execution. Preserve clear hierarchy without duplicated success celebration or new feature modules.
+Image 2 is the already generated running-task UI, used as the visual style and shared header/layout reference. Match its indigo accent, typography, thin borders, rounded cards and page density. Image 1 defines the completed screen's required results area. Include all results without cropping; modestly compress the stage/event area to fit.

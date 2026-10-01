@@ -1,0 +1,23 @@
+Use case: ui-mockup.
+Asset type: A single high-fidelity desktop web application UI design screen for a minimal Design-to-Code Agent product, suitable for a frontend developer to implement.
+Style: clean, restrained, practical engineering tool. Follow the source wireframe's white surfaces, pale cool gray canvas, indigo primary action, subtle dividers, compact header and rounded cards. Crisp Simplified Chinese typography, consistent 8px spacing, no decorative hero illustration. Landscape canvas approximately 1600x1000. Full front-facing flat screen; no physical laptop, no perspective, no desktop background. Keep all important controls fully visible with generous but efficient spacing.
+Reference is an interaction prototype, used as information architecture and visual style reference, not a target for pixel-perfect editing. Remove its top prototype simulation toolbar. Retain a discreet "示例界面" label in the product header, because task data are illustrative.
+Do not invent extra modules: no sidebar dashboard, chatbot, billing, model picker, agent team, charts, code editor, deployment button, success percentage or remaining-time estimate. Keep product name "Design Agent", "MVP" badge and consistent simple D-arrow mark. Realistic, implementable components, readable Chinese labels, single screen per image.
+Screen: Running task detail. Image 1 is the reference for information hierarchy. Preserve its two-column work area.
+Exact page title: "订单筛选开发任务"; nearby status pill "运行中"; small task label "task-001 · 示例任务". Current-stage sentence: "正在实现状态筛选与重置交互。"
+Input summary: "订单管理-设计稿.png · 订单筛选需求.md" and "example/order-console / main".
+Left card "执行阶段" with exactly five vertically linked stages:
+"解析材料" — "已完成";
+"准备仓库" — "已完成";
+"理解与规划" — "已完成";
+"开发代码" — "进行中";
+"检查与交付" — "未开始".
+Use checked marks for first three, indigo active circle for fourth and neutral fifth. Do NOT use percent bars or countdowns.
+Right card "任务动态" with "关键事件"; readable sample event rows:
+"10:00:00 任务已创建，等待后台执行。"
+"10:00:03 已读取设计稿和 PRD。"
+"10:00:20 已创建任务分支。"
+"10:00:42 已定位订单页面与查询 hook。"
+"10:01:10 正在复用已有组件实现筛选。"
+One collapsed "本次需求" disclosure below. Footer helper "可离开页面，通过任务链接查看进度。". Secondary button "返回新建任务". Header navigation "新建任务" and "当前任务". No completed results card yet; ample intentional empty space, avoid dashboard filler.
+Image 2 is the already generated new-task UI, used only as the visual style reference. Match its indigo buttons, header, typography, white card surfaces, thin borders, and spacing. The content of Image 1 determines this running screen.

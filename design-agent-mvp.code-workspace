@@ -1,0 +1,11 @@
+{
+  "folders": [
+    { "name": "Design Agent MVP", "path": "." },
+    { "name": "Design Agent", "path": "design-agent" },
+    { "name": "CRM", "path": "customer-manager" }
+  ],
+  "settings": {
+    "git.enabled": true,
+    "git.autoRepositoryDetection": true
+  }
+}

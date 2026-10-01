@@ -1,0 +1,27 @@
+# Local credentials
+.env
+.env.*
+!.env.example
+LLM env*
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Dependencies, build output and runtime data
+node_modules
+.venv/
+dist/
+runtime/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.cache/
+coverage/
+.DS_Store
+
+# Machine-specific review and publishing files
+/review-latest.code-workspace
+/.publish/

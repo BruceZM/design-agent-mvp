@@ -1,0 +1,5 @@
+Use case: ui-mockup
+Asset type: Chinese desktop CRM UI development design.
+Reference image 1: low fidelity prototype of editing customer, preserve drawer layout.
+Reference image 2: finished CRM list design, match exact teal/white style, sidebar, typography, customer table.
+Create one high fidelity flat full-screen 1440x1000 web UI screenshot of the SAME 青禾 CRM product with a 440px wide white editing drawer occupying the right side, subtle dim overlay over the customer list behind. Drawer header small 客户档案 then large 编辑客户, upper-right X close icon. Subtitle 维护客户基本信息与跟进记录。 Form labels and values: 客户姓名 * / 林若安; 公司 / 青禾科技; 联系电话 / 13800000000; 跟进状态 / 待联系; 跟进备注 / 计划本周联系，了解业务需求与合作时间。 Fields crisp outline, generous spacing, gray-green muted labels and teal focus details. Footer at bottom with 取消 outline button and teal 保存客户 primary button. Background same table without any status filter. Restful balanced professional SaaS, no invented analytics, no perspective, no devices, no browser chrome. Chinese text legible, no decorative illustrations, no gradients. Maintain reference functional hierarchy.

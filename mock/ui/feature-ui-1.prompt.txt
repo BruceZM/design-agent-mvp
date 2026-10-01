@@ -1,0 +1,16 @@
+Use case: ui-mockup
+Asset type: high-fidelity desktop UI design PNG for the local Qinghe CRM Design Agent mock requirement.
+Input image: customer-manager/docs/ui/01-list-design.png is a visual style and information architecture reference only. Create a new screen with the added keyword-search toolbar; retain its calm teal, pale neutral background, white sidebar, white card and crisp Chinese typography.
+Primary request: Create one complete, front-facing desktop UI design of 青禾 CRM 客户档案, showing the NEW keyword search feature with the query 青禾 and exactly six matching customers. This is a realistic software design screenshot, not a photograph or browser mockup. Use approximately 1440×1080 landscape framing; all card content and footer must fit inside the image. No explanatory panels or annotations outside the actual app.
+Layout: white sidebar at the left about 210px wide. Brand 青禾 CRM, small 工作空间 section label, active 客户档案 navigation, 本地演示版本 at the bottom. Pale background #f4f7f7, dark green text. Main area has breadcrumb 工作空间 / 客户档案, a small CUSTOMER WORKSPACE eyebrow, large heading 客户档案, subtitle 维护客户信息，记录每一次跟进。, top-right teal button + 新增客户. Main white rounded customer card has header 搜索结果 with a small badge 6, and small muted text 及时更新，让跟进更有序. Immediately below this header and above the table headers add one clearly visible keyword-search toolbar: magnifying-glass icon and outlined 360px wide input showing the exact text 青禾, a secondary outlined button 清空搜索, and muted helper 按姓名、公司或手机号搜索. Input and button are about 40px tall; keep spacing generous and aligned with the card padding.
+Table headers, verbatim: 客户 | 公司 | 联系方式 | 跟进状态 | 最近更新 | 操作.
+Exactly these six table rows, in this order, with small colored initial avatars and subdued status badges:
+林若安 | 青禾科技 | 13800000000 | 待联系 | 2026-10-01 | 编辑
+沈亦宁 | 青禾科技 | 13800000004 | 跟进中 | 2026-10-01 | 编辑
+宋一诺 | 青禾科技 | 13800000008 | 已成交 | 2026-10-01 | 编辑
+梁星河 | 青禾科技 | 13800000012 | 待联系 | 2026-10-01 | 编辑
+李言希 | 青禾科技 | 13800000016 | 跟进中 | 2026-10-01 | 编辑
+蔡明远 | 青禾科技 | 13800000020 | 已成交 | 2026-10-01 | 编辑
+Card footer, verbatim: 共 6 位客户 · 每页 8 条. Right side: disabled 上一页 button, 1 / 1 indicator, disabled 下一页 button. App footer: 演示数据保存在当前浏览器 and 青禾 CRM · MVP.
+Style: restrained production-quality SaaS interface matching the existing CRM. Main teal #0f766e, border #e4ebea, muted text #7a8a87. Fine horizontal table dividers, subtle rounded corners, minimal shadow. Warm amber 待联系, pale blue 跟进中, soft green 已成交. Make Chinese labels sharp and readable, phone numbers exact and unspaced. Search toolbar is the main new element. White background in the card and sidebar. Flat screenshot with no perspective, device frame, watermark or decorative illustration.
+Constraints: one screen only; exactly six rows; no status filter, sorting control, search submit button, analytics cards, extra navigation modules, extra matching rows or annotation labels. The search input must visibly contain 青禾. The header badge and pagination total must both be 6. Do not reproduce the original 24-customer pagination or copy the original rows that do not match 青禾科技.
