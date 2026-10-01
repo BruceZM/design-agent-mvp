@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Pencil, ArrowUpRight } from "lucide-react";
-import { STATUSES, type Customer } from "../types";
+import { STATUSES, type Customer, type CustomerStatus } from "../types";
+
+export type StatusFilter = CustomerStatus | "全部状态";
+const FILTER_OPTIONS: StatusFilter[] = ["全部状态", ...STATUSES];
+
 interface Props {
   customers: Customer[];
   onView: (c: Customer) => void;
@@ -8,10 +12,18 @@ interface Props {
 }
 const PAGE_SIZE = 8;
 export function CustomerList({ customers, onView, onEdit }: Props) {
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("全部状态");
   const [page, setPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(customers.length / PAGE_SIZE));
+  const filtered = useMemo(
+    () =>
+      statusFilter === "全部状态"
+        ? customers
+        : customers.filter((c) => c.status === statusFilter),
+    [customers, statusFilter],
+  );
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
-  const rows = customers.slice(
+  const rows = filtered.slice(
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE,
   );
@@ -19,9 +31,36 @@ export function CustomerList({ customers, onView, onEdit }: Props) {
     <section className="list-card" aria-label="客户列表">
       <div className="list-heading">
         <h2>
-          全部客户 <span>{customers.length}</span>
+          全部客户 <span>{filtered.length}</span>
         </h2>
         <span className="muted">及时更新，让跟进更有序</span>
+      </div>
+      <div className="filter-bar">
+        <label htmlFor="status-filter">跟进状态</label>
+        <select
+          id="status-filter"
+          value={statusFilter}
+          onChange={(e) => {
+            setStatusFilter(e.target.value as StatusFilter);
+            setPage(1);
+          }}
+        >
+          {FILTER_OPTIONS.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="text-button reset-button"
+          onClick={() => {
+            setStatusFilter("全部状态");
+            setPage(1);
+          }}
+        >
+          重置
+        </button>
       </div>
       <div className="table-wrap">
         <table>
@@ -101,13 +140,13 @@ export function CustomerList({ customers, onView, onEdit }: Props) {
       </div>
       {!rows.length && (
         <div className="empty">
-          <h3>还没有客户</h3>
-          <p>点击「新增客户」，建立第一份客户档案。</p>
+          <h3>没有符合条件的客户</h3>
+          <p>请调整「跟进状态」筛选或点击「重置」查看全部客户。</p>
         </div>
       )}
       <footer className="pagination">
         <span>
-          共 {customers.length} 位客户 · 每页 {PAGE_SIZE} 条
+          共 {filtered.length} 位客户 · 每页 {PAGE_SIZE} 条
         </span>
         <div>
           <button
