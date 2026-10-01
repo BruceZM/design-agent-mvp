@@ -1,3 +1,5 @@
+# 离线行为测试：真实临时 SQLite/Git + 替换模型和构建结果，不改正式 CRM。
+# 阅读这些测试可理解 MVP 的边界：幂等、权限、修复上限、中断和串行执行。
 import subprocess
 import threading
 from io import BytesIO
@@ -18,6 +20,7 @@ from PIL import Image
 
 
 def image_bytes():
+    # 生成最小有效 PNG，让上传校验走真实 Pillow，不依赖仓库里的设计图。
     buf = BytesIO()
     Image.new("RGB", (20, 20), "white").save(buf, format="PNG")
     return buf.getvalue()
@@ -25,6 +28,8 @@ def image_bytes():
 
 @pytest.fixture
 def settings(tmp_path):
+    # pytest 为每个测试创建独立临时目录，构造 main 基线和假依赖目录。
+    # Settings 注入假密钥只是通过配置检查，不代表会调用任何外部模型。
     target = tmp_path / "crm"
     (target / "src").mkdir(parents=True)
     (target / "node_modules").mkdir()
@@ -58,6 +63,7 @@ def settings(tmp_path):
 
 
 def create_task(settings, store, task_id="t-111111111111"):
+    # 模拟“HTTP 已保存材料并写入队列”的起点，供工作流测试直接使用。
     directory = settings.runtime / "tasks" / task_id
     directory.mkdir(parents=True)
     (directory / "design.png").write_bytes(image_bytes())
@@ -77,6 +83,7 @@ def create_task(settings, store, task_id="t-111111111111"):
 
 
 def test_file_validation_and_parsers():
+    # 验证真实图片校验、拒绝无效类型，以及 DOCX 段落/表格文字提取。
     validate_image(image_bytes(), "design.png")
     with pytest.raises(ValueError):
         validate_image(b"not an image", "design.png")
@@ -99,6 +106,8 @@ def test_file_validation_and_parsers():
 
 
 def test_upload_idempotency_and_validation(settings):
+    # TestClient 走完整 API，但关闭 Worker，因此重复 POST 不会触发模型执行。
+    # 同 key 同材料应只有一个任务；改材料返回 409；任意 .env 下载应被拒绝。
     app = create_app(settings, start_worker=False)
     with TestClient(app) as client:
         files = {
@@ -141,6 +150,8 @@ def test_upload_idempotency_and_validation(settings):
 
 
 def test_repository_isolation_and_paths(settings):
+    # 真正创建 Git worktree，验证越权路径/符号链接被拒绝、新文件能进入 diff。
+    # 同时确认主目录和 main 提交保持原基线，避免只测“工具返回成功”。
     repo = Repository(
         settings.target, settings.runtime / "worktrees" / "t-222222222222"
     )
@@ -170,6 +181,8 @@ def test_repository_isolation_and_paths(settings):
 
 
 class FakeDeveloper:
+    # 保留与 Developer 一样的接口，确定性写一处源码，去掉模型随机性和费用。
+    # 这里的 budget 是计数替身，不能作为真实模型 token 使用证据。
     def __init__(self, settings, repo, event):
         self.repo = repo
         self.budget = SimpleNamespace(calls=0, tokens=0)
@@ -193,10 +206,12 @@ class FakeDeveloper:
 
 
 async def fake_vision(*args):
+    # 注入异步替身，仍验证 materials 用 asyncio.run 等待结果的调用链。
     return "Offline visual fixture only."
 
 
 def test_graph_repairs_and_delivery(settings, monkeypatch):
+    # 人为让首项检查失败、下一轮通过，验证只修复一次并成功保存真实 Git diff。
     store = Store(settings.runtime / "tasks.sqlite3")
     create_task(settings, store)
     counts = {"n": 0}
@@ -227,6 +242,7 @@ def test_graph_repairs_and_delivery(settings, monkeypatch):
 
 
 def test_graph_stops_on_check_failures(settings, monkeypatch):
+    # 每轮都失败时必须达到上限后结束，保留改动与失败报告，不能无限循环。
     store = Store(settings.runtime / "tasks.sqlite3")
     create_task(settings, store)
     monkeypatch.setattr(
@@ -251,6 +267,7 @@ def test_graph_stops_on_check_failures(settings, monkeypatch):
 
 
 def test_vision_failure_and_restart_are_honest(settings):
+    # 视觉异常与服务重启都应形成真实 failed/interrupted 状态，而不是虚报成功。
     store = Store(settings.runtime / "tasks.sqlite3")
     create_task(settings, store)
 
@@ -273,6 +290,7 @@ def test_vision_failure_and_restart_are_honest(settings):
 
 
 def test_call_budget_and_redaction(settings):
+    # 达到调用上限后下一次 consume 必须拒绝；日志中的当前配置密钥应被替换。
     settings.max_model_calls = 2
     budget = Budget(settings)
     budget.consume()
@@ -283,6 +301,8 @@ def test_call_budget_and_redaction(settings):
 
 
 def test_worker_runs_without_browser_and_serializes_tasks(settings, monkeypatch):
+    # Event 精确控制第一条任务何时结束，验证第二条不能在第一条阻塞时开始。
+    # 不依赖浏览器轮询推动执行，证明 Worker 与网页请求生命周期独立。
     store = Store(settings.runtime / "tasks.sqlite3")
     create_task(settings, store)
     create_task(settings, store, "t-333333333333")
@@ -313,7 +333,7 @@ def test_worker_runs_without_browser_and_serializes_tasks(settings, monkeypatch)
         assert first_started.wait(2)
         assert len(starts) == 1
         assert store.get("t-333333333333")["status"] == "queued"
-        # No browser or polling request participates in executing either task.
+        # 两条任务都由 Worker 自己推进，没有浏览器/轮询请求参与。
         release.set()
         assert finished.wait(2)
         assert all(task["status"] == "succeeded" for task in store.list())

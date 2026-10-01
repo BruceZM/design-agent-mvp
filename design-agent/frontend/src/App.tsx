@@ -1,3 +1,6 @@
+// 页面总入口，按阅读顺序包含：简单路由、上传组件、新建任务、任务详情。
+// useState 驱动渲染，useRef 保存不需渲染的稳定值，useEffect 管理外部副作用。
+// 前端负责提交和展示；模型执行、Git 写入和长任务状态都由后端负责。
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowUpRight,
@@ -24,6 +27,8 @@ import {
 } from "lucide-react";
 import { request, ApiError, type Health, type Task } from "./api";
 
+// 展示层合并“检查和交付”为一个步骤；真实后端图仍有 check、deliver 两个节点。
+// as const 保留字符串字面量类型，避免阶段名称退化成任意 string。
 const steps = [
   ["materials", "解析材料"],
   ["prepare", "准备仓库"],
@@ -38,13 +43,16 @@ const statusText = {
   failed: "任务失败",
 };
 function usePath() {
+  // MVP 只有两个页面，因此用 History API 做最小路由，不引入完整路由库。
   const [path, setPath] = useState(location.pathname);
   useEffect(() => {
     const fn = () => setPath(location.pathname);
     window.addEventListener("popstate", fn);
+    // 浏览器后退/前进会触发 popstate；卸载时解绑，避免重复监听。
     return () => window.removeEventListener("popstate", fn);
   }, []);
   const navigate = (to: string) => {
+    // pushState 不会主动触发 popstate，所以同时更新 React 中的 path。
     history.pushState({}, "", to);
     setPath(to);
     window.scrollTo(0, 0);
@@ -52,6 +60,7 @@ function usePath() {
   return { path, navigate };
 }
 function formatDate(value: string) {
+  // 后端存 UTC，toLocaleString 按浏览器时区显示，不改动服务端时间。
   return new Date(value).toLocaleString("zh-CN", {
     month: "2-digit",
     day: "2-digit",
@@ -62,6 +71,7 @@ function formatDate(value: string) {
   });
 }
 function readableError(error: unknown) {
+  // unknown 需要先判断类型；HTTP 错误展示服务端说明，网络异常给统一提示。
   return error instanceof ApiError
     ? error.message
     : "网络暂时不可用，请确认本地后台服务正在运行";
@@ -73,11 +83,13 @@ function Modal({
   children: React.ReactNode;
   onClose: () => void;
 }) {
+  // 原生 dialog 的 showModal 提供模态遮罩和焦点管理；ref 用于命令式 API。
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     ref.current?.showModal();
     return () => ref.current?.close();
   }, []);
+  // Escape 先交给父组件决定是否关闭，父组件可在 busy 时阻止关闭确认框。
   return (
     <dialog
       ref={ref}
@@ -95,12 +107,14 @@ function Modal({
 export default function App() {
   const { path, navigate } = usePath();
   const [health, setHealth] = useState<Health | null>(null);
+  // 换页面时刷新服务配置，仅查询配置状态，不会触发模型调用。
   useEffect(() => {
     request<Health>("/api/health")
       .then(setHealth)
       .catch(() => setHealth(null));
   }, [path]);
   const match = path.match(/^\/tasks\/(t-[a-f0-9]{12})$/);
+  // 公共壳包含侧栏和顶栏；任务 ID 匹配时渲染详情，否则回到上传工作台。
   return (
     <div className="shell">
       <aside className="sidebar">
@@ -163,6 +177,7 @@ function UploadCard({
   error: string;
   disabled: boolean;
 }) {
+  // 同一个组件通过 type 切换图片/PRD；File 保存在父组件，提交时一起上传。
   const [preview, setPreview] = useState("");
   useEffect(() => {
     if (type !== "design" || !file) {
@@ -170,10 +185,13 @@ function UploadCard({
       return;
     }
     const url = URL.createObjectURL(file);
+    // object URL 只用于本地预览，此时尚未上传；文件改变/卸载时释放引用。
     setPreview(url);
     return () => URL.revokeObjectURL(url);
   }, [file, type]);
   const id = type === "design" ? "design-upload" : "prd-upload";
+  // input 的 accept 是选择器提示，真正内容校验在后端 documents.py。
+  // label 的 htmlFor 关联原生文件 input，busy 时禁用重选以免请求材料变化。
   return (
     <section className="upload-card">
       <div className="card-label">
@@ -255,6 +273,7 @@ function NewTask({
   health: Health | null;
   navigate: (path: string) => void;
 }) {
+  // confirm 控制二次确认框，busy 控制一次上传请求，二者都不是后台任务状态。
   const [design, setDesign] = useState<File | null>(null),
     [prd, setPrd] = useState<File | null>(null),
     [instructions, setInstructions] = useState(""),
@@ -263,6 +282,8 @@ function NewTask({
     [error, setError] = useState(""),
     [errors, setErrors] = useState({ design: "", prd: "" }),
     [tasks, setTasks] = useState<Task[]>([]);
+  // 同一次提交用稳定 key；sessionStorage 让页面刷新后仍可找回未确认的提交。
+  // key 不是 GitHub token 或模型密钥，仅用于后端幂等去重。
   const key = useRef(
     sessionStorage.getItem("design-agent-submission") || crypto.randomUUID(),
   );
@@ -270,6 +291,7 @@ function NewTask({
     !!sessionStorage.getItem("design-agent-submission"),
   );
   const refresh = useCallback(
+    // useCallback 保持函数引用稳定，避免下方 effect 因每次渲染都换函数而反复执行。
     () =>
       request<{ tasks: Task[] }>("/api/tasks")
         .then((r) => setTasks(r.tasks))
@@ -280,6 +302,7 @@ function NewTask({
     refresh();
   }, [refresh]);
   function validate() {
+    // 前端快速检查文件名和大小，给即时反馈；无法证明文件内部格式有效。
     let a = "",
       b = "";
     if (!design) a = "请选择一张设计稿";
@@ -298,17 +321,21 @@ function NewTask({
     return !a && !b;
   }
   function done(task: Task) {
+    // 已得到任务 ID 才清理恢复标识并跳转；随后由详情页轮询后台状态。
     sessionStorage.removeItem("design-agent-submission");
     setRecover(false);
     setConfirm(false);
     navigate(`/tasks/${task.id}`);
   }
   async function submit() {
+    // busy 防止重复点击；后端仍必须用 key 去重，因为网络层重试不受按钮控制。
     if (!design || !prd || busy) return;
     setBusy(true);
     setError("");
     sessionStorage.setItem("design-agent-submission", key.current);
+    // 发送前保存标识：响应丢失或页面刷新后也能查询是否已经创建任务。
     const form = new FormData();
+    // 字段名对应后端 submit 参数。浏览器生成 multipart boundary，勿手填 Content-Type。
     form.append("design", design);
     form.append("prd", prd);
     form.append("instructions", instructions);
@@ -326,25 +353,31 @@ function NewTask({
         ),
       );
     } catch (err) {
+      // 非 ApiError 表示没有得到明确 HTTP 结果，服务器可能已经接收成功。
+      // 先按原 key 查询；查不到时保留 key，重试仍不会创建第二条同材料任务。
       if (!(err instanceof ApiError)) {
         try {
           done(await request<Task>(`/api/submissions/${key.current}`));
           return;
         } catch {
-          /* Reusing the same key on retry prevents a second task. */
+          /* 原 key 留给重试使用；此处不自动重新 POST 或启动新的模型任务。 */
         }
       }
       setError(readableError(err));
       setRecover(true);
       if (err instanceof ApiError && err.status !== 409) {
+        // 明确的校验等错误解除刷新后的恢复提示；409 保留冲突信息供用户处理。
+        // 当前组件的 ref 没有重新生成 key，只有成功/重新进入页面才结束此流程。
         sessionStorage.removeItem("design-agent-submission");
         setRecover(false);
       }
     } finally {
+      // HTTP 提交结束就解除 busy；后台任务可能还要运行很久。
       setBusy(false);
     }
   }
   async function recoverSubmission() {
+    // 恢复只 GET 原提交，不需要重新选择文件，也不会再次调用模型。
     setBusy(true);
     setError("");
     try {
@@ -359,6 +392,8 @@ function NewTask({
       setBusy(false);
     }
   }
+  // 下面按“材料 → 补充说明 → 确认框 → 最近任务”渲染；仅确认提交调用 submit。
+  // JSX 根据状态声明界面，不手动查 DOM 改按钮；文件显示“已选择”不等于已上传。
   return (
     <>
       <div className="breadcrumb">
@@ -601,6 +636,7 @@ function TaskPage({
   id: string;
   navigate: (path: string) => void;
 }) {
+  // connection 描述网页与 API 的连接；task.status 描述后台执行，断网不等于任务失败。
   const [task, setTask] = useState<Task | null>(null),
     [connection, setConnection] = useState<
       "loading" | "connected" | "disconnected"
@@ -611,6 +647,8 @@ function TaskPage({
     [copied, setCopied] = useState(false),
     [retry, setRetry] = useState(0);
   useEffect(() => {
+    // 每个任务 ID/手动重连各建立一轮轮询；结束时清理定时器并忽略旧响应。
+    // cancelled 不强制取消已发出的 fetch，它负责防止旧请求修改新页面状态。
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout>;
     let failures = 0;
@@ -618,10 +656,13 @@ function TaskPage({
       try {
         const next = await request<Task>(`/api/tasks/${id}`);
         if (cancelled) return;
+        // 服务端 revision 单调递增，网络返回顺序改变时保留较新的快照。
         setTask((old) => (!old || next.revision >= old.revision ? next : old));
         setConnection("connected");
         setError("");
         failures = 0;
+        // 先等本轮请求完成再安排下一轮，避免 setInterval 导致多个请求重叠。
+        // succeeded/failed 时停止常规轮询，页面直接保留最终快照。
         if (next.status === "queued" || next.status === "running")
           timer = setTimeout(poll, 3000);
       } catch (err) {
@@ -629,6 +670,7 @@ function TaskPage({
         setConnection("disconnected");
         setError(readableError(err));
         if (err instanceof ApiError && err.status === 404) return;
+        // 临时断网渐进等待，最多 15 秒；任务不存在则停止请求。
         failures++;
         timer = setTimeout(poll, Math.min(15000, 3000 * failures));
       }
@@ -640,6 +682,7 @@ function TaskPage({
     };
   }, [id, retry]);
   async function loadDiff() {
+    // 按需读取纯文本差异并缓存，避免每次轮询重复下载较大的 diff。
     setShowDiff(!showDiff);
     if (diff === null) {
       try {
@@ -651,6 +694,8 @@ function TaskPage({
       }
     }
   }
+  // 后台 deliver/completed/checks_failed 都归入页面的“检查与交付”。
+  // interrupted 使用原阶段定位失败步骤，避免把服务重启误画成材料校验失败。
   const displayedPhase =
     task?.phase === "interrupted"
       ? task.interrupted_phase
@@ -662,7 +707,10 @@ function TaskPage({
     : -1;
   const completed = task?.status === "succeeded";
   const terminal = completed || task?.status === "failed";
+  // succeeded 仅表示源码变化且编译/构建通过；checks 中的 not_run 仍需展示。
   const checks = task?.checks ?? [];
+  // 详情依次渲染阶段、seq 有序日志、计划和结果。下载按钮只引用后端提供的产物。
+  // diff 放在 pre 的文本节点里，React 会转义，不把生成代码当 HTML 执行。
   return (
     <>
       <button className="back-link" onClick={() => navigate("/")}>
@@ -712,6 +760,7 @@ function TaskPage({
               <h2>开发流程</h2>
               <ol>
                 {steps.map(([key, name], i) => {
+                  // 视觉状态由终态和阶段索引派生，不建立另一份容易不同步的进度状态。
                   const done = completed || i < phaseIndex;
                   const active =
                     !terminal && task.status === "running" && i === phaseIndex;

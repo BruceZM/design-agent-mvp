@@ -1,0 +1,34 @@
+flowchart TB
+    accTitle: LangGraph 六节点工作流与有限修复
+    accDescr: 检查失败时最多返回开发一次，随后进入交付；只有检查通过且有源文件变化才创建成功提交。任意阶段异常保存失败信息。
+    START([START]) --> M["materials · 材料解析<br/>PRD 提取 + GLM 原图识别"]
+    M --> P["prepare · 仓库准备<br/>从 main 创建分支与 worktree"]
+    P --> L["plan · 开发计划<br/>GLM 输出 JSON，校验文件权限"]
+    L --> D["develop · 编码<br/>LangChain 模型与工具循环"]
+    D --> C["check · 独立检查<br/>typecheck + build；attempt 加 1"]
+    C --> OK{"检查通过？"}
+    OK -->|否| R{"可再修复？"}
+    R -->|是 · 默认最多 1 轮| D
+    OK -->|是| V
+    R -->|否| V
+    subgraph DELIVERY[deliver · 交付节点的内部判断]
+        V["保存 changes.diff<br/>整理检查结果"] --> PASS{"通过且有改动？"}
+        PASS -->|是| COMMIT["创建本地 Git 提交<br/>写入 succeeded 报告"]
+        PASS -->|否| FAIL["保留失败分支与报告<br/>写入 failed；不提交"]
+    end
+    COMMIT --> END([END])
+    FAIL --> END
+    ERR["阶段异常 / 预算耗尽<br/>保存失败信息与已有差异"] -.-> END
+    M -.异常示例.-> ERR
+    D -.异常示例.-> ERR
+    classDef base fill:#E1F4FF,stroke:#0878F9,color:#202B38,stroke-width:1.5px;
+    classDef decision fill:#FFF3C7,stroke:#F5A623,color:#202B38,stroke-width:1.5px;
+    classDef tool fill:#E8E6FF,stroke:#7966E8,color:#202B38,stroke-width:1.5px;
+    classDef success fill:#E4F4E8,stroke:#348456,color:#202B38,stroke-width:1.5px;
+    classDef failure fill:#FFE9E9,stroke:#CC5454,color:#202B38,stroke-width:1.5px;
+    class START,END,M,P,L,C,V base;
+    class D tool;
+    class OK,R,PASS decision;
+    class COMMIT success;
+    class FAIL,ERR failure;
+    style DELIVERY fill:#F5F7FA,stroke:#C6CDD5

@@ -1,0 +1,41 @@
+sequenceDiagram
+    accTitle: 从上传到后台交付的任务时序
+    accDescr: 提交请求返回任务 ID 后，Worker 独立执行；前端每三秒读取 SQLite 快照，结束后查看差异、报告和预览。
+    actor U as 用户
+    participant F as React 前端
+    participant A as FastAPI
+    participant S as SQLite
+    participant W as 串行 Worker
+    participant G as LangGraph 工作流
+    U->>F: 上传设计稿 + PRD，确认提交
+    F->>A: POST /api/tasks + idempotency_key
+    A->>A: 校验文件、解析 PRD、计算材料指纹
+    A->>S: 检查提交标识
+    alt 同一标识且材料一致
+        S-->>A: 已存在的任务
+        A-->>F: 202，返回已有任务
+    else 首次提交
+        A->>A: 保存原始材料到 runtime/tasks
+        A->>S: 写入 queued 任务与首条事件
+        A->>W: notify 唤醒
+        A-->>F: 202 + 任务 ID
+    end
+    F-->>U: 跳转任务详情页
+    W->>S: 查询最早的 queued 任务
+    S-->>W: 任务 ID
+    W->>G: Workflow.run()
+    loop queued / running 时每 3 秒
+        F->>A: GET /api/tasks/任务-id
+        A->>S: 读取快照与事件
+        S-->>A: status / phase / revision / events
+        A-->>F: 任务数据 + 可用产物列表
+        F-->>U: 更新阶段、日志与检查结果
+        G->>S: 持续写入阶段状态与事件
+    end
+    G->>S: 写入 succeeded 或 failed
+    G-->>W: 当前任务结束，继续下一条
+    F->>A: 获取最终快照
+    A-->>F: 终态、差异、报告与可用预览
+    F-->>U: 停止常规轮询，展示交付结果
+    Note over F,W: 关闭网页不停止后台任务；后端进程停止会中断执行
+    Note over A,S: 同一标识但材料改变返回 409；上传校验失败不创建任务

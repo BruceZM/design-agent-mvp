@@ -4,6 +4,10 @@
 
 目标固定为相邻的 `../customer-manager` 仓库，基线固定为 `main`。页面不提供仓库 URL 输入。没有 RAG、登录、远程推送或部署。
 
+## 学习入口
+
+源码已补充中文注释。建议先看 [代码阅读指南](docs/代码阅读指南.md)，再对照 [项目流程图](../docs/项目流程图.md) 阅读 `frontend/src/App.tsx` → `backend/app/main.py` → `worker.py` → `workflow.py` → `agent.py`。
+
 ## 启动
 
 需要 Node.js 22.12+、Python 3.12 和 uv、Git。图片解析使用远程多模态模型，不再依赖 macOS OCR、Swift 或 Xcode。依赖版本记录在 npm lock 与 `uv.lock`。

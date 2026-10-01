@@ -1,0 +1,62 @@
+[
+  {
+    "id": "01-architecture",
+    "title": "系统长什么样",
+    "tag": "系统架构",
+    "intro": "从网页、后端、模型到本地数据，先看清每一层负责什么。",
+    "notes": [
+      "前端通过 HTTP 提交与轮询。任务详情在 queued / running 时每 3 秒查询一次；网络失败时最多退避到 15 秒。",
+      "单线程 Worker 从 SQLite 按创建时间取任务；没有 Celery、Redis、向量库或 RAG。",
+      "GLM 负责识图、规划和编码决策；文件读写、Git 与检查命令由本地代码执行。"
+    ],
+    "sources": ["design-agent/backend/app/main.py", "design-agent/backend/app/worker.py", "design-agent/backend/app/store.py"]
+  },
+  {
+    "id": "02-sequence",
+    "title": "一次上传如何变成后台任务",
+    "tag": "任务时序",
+    "intro": "提交请求不等待模型开发结束；前端拿到任务 ID 后独立查询执行进度。",
+    "notes": [
+      "材料验证与任务写入发生在返回 202 之前；Worker 唤醒通知不是持久化队列，queued 状态保存在 SQLite。",
+      "提交响应丢失时，前端用同一提交标识查询 /api/submissions，再决定是否重试，避免重复创建任务。",
+      "后端重启会把原 running 任务标记 failed / interrupted，保留已有产物；queued 任务继续排队，不从中断节点恢复。"
+    ],
+    "sources": ["design-agent/frontend/src/App.tsx", "design-agent/backend/app/main.py", "design-agent/backend/app/worker.py"]
+  },
+  {
+    "id": "03-langgraph",
+    "title": "LangGraph 工作流怎么转",
+    "tag": "状态图",
+    "intro": "六个真实节点串起开发流程；判断菱形展开了检查路由与交付节点内部的逻辑。",
+    "notes": [
+      "外层实际节点是 materials、prepare、plan、develop、check、deliver；条件判断不是额外的持久化节点。",
+      "默认 max_repairs=1：首次检查失败后最多修复一轮，再次检查后一定进入交付。",
+      "succeeded 只表示有源码改动且 typecheck / build 通过。浏览器功能和视觉检查在报告中仍标记 not_run。"
+    ],
+    "sources": ["design-agent/backend/app/workflow.py", "design-agent/backend/app/config.py"]
+  },
+  {
+    "id": "04-tool-loop",
+    "title": "模型怎样真正改动代码",
+    "tag": "工具循环",
+    "intro": "这是 develop 节点内部由 LangChain create_agent 组织的循环，与外层六节点工作流分开理解。",
+    "notes": [
+      "模型返回工具调用请求，本地执行五种白名单工具，然后将结果作为 ToolMessage 交还模型。",
+      "默认预算为计划与编码合计最多 16 次模型调用；计时从 Developer 创建开始。材料识图另有一次请求与 110 秒外层超时。",
+      "只可读取 README 与 src；只可写 src 中的 TS / TSX / CSS。SDK 不自动重试，工具之间保留 GLM reasoning_content。"
+    ],
+    "sources": ["design-agent/backend/app/agent.py", "design-agent/backend/app/models.py", "design-agent/backend/app/repository.py"]
+  },
+  {
+    "id": "05-git-delivery",
+    "title": "分支、预览与远程交付",
+    "tag": "代码交付",
+    "intro": "本地 CRM 的隔离开发，与整个项目在一个 GitHub 公开仓库中的展示，是两个不同步骤。",
+    "notes": [
+      "Agent 从 customer-manager 的固定 main 创建 worktree；依赖以本地符号链接共用，模型不能修改依赖或 Git。",
+      "当前后台交付只保存本地分支、差异、报告与可用预览；remote_pushed=false，不自动推送、合并或部署。",
+      "现有公开仓库和三个成果分支由人工整理同步。图中虚线表示人工步骤，不应介绍成 Agent 已实现的自动能力。"
+    ],
+    "sources": ["design-agent/backend/app/repository.py", "design-agent/backend/app/workflow.py", "docs/任务分支说明.md"]
+  }
+]

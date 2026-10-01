@@ -1,0 +1,30 @@
+flowchart TB
+    accTitle: 本地 Git 隔离开发与一个远程仓库的交付关系
+    accDescr: Agent 自动在 CRM worktree 中开发并提交成功结果；公开仓库中的统一目录和任务分支由人工整理推送，不属于后台自动流程。
+    subgraph LOCAL[Agent 自动执行 · 本地 CRM 仓库]
+        BASE["customer-manager · main<br/>固定开发基线"] --> WT["新建 design-agent/任务-id<br/>独立 worktree，共用已安装依赖"]
+        WT --> CODE["修改 src/ 内 TS / TSX / CSS<br/>执行固定编译与构建检查"]
+        CODE --> GATE{"有改动且检查通过？"}
+        GATE -->|是| COMMIT["创建本地 Git 提交<br/>记录成功交付"]
+        GATE -->|否| KEEP["保留分支、差异和失败报告<br/>不创建成功提交"]
+        COMMIT --> ART["交付 changes.diff 与报告<br/>build 通过时提供本地预览"]
+        KEEP --> ART
+    end
+    subgraph REMOTE[GitHub · 一个远程公开仓库]
+        MAIN["design-agent-mvp · main<br/>Agent + CRM 基线 + mock + 设计资料"]
+        TASK["design-agent/任务-id<br/>统一目录下的 CRM 需求成果"]
+        MAIN -->|同一基线下比较| TASK
+    end
+    BASE -.人工整理整个项目并发布.-> MAIN
+    COMMIT -.人工转存源码差异并推送.-> TASK
+    ART --> REVIEW["人工浏览器与视觉验收<br/>检查交互、功能与设计还原"]
+    classDef base fill:#E1F4FF,stroke:#0878F9,color:#202B38,stroke-width:1.5px;
+    classDef decision fill:#FFF3C7,stroke:#F5A623,color:#202B38,stroke-width:1.5px;
+    classDef success fill:#E4F4E8,stroke:#348456,color:#202B38,stroke-width:1.5px;
+    classDef failure fill:#FFE9E9,stroke:#CC5454,color:#202B38,stroke-width:1.5px;
+    class BASE,WT,CODE,ART,MAIN,TASK,REVIEW base;
+    class GATE decision;
+    class COMMIT success;
+    class KEEP failure;
+    style LOCAL fill:#F5F7FA,stroke:#C6CDD5
+    style REMOTE fill:#F5F7FA,stroke:#C6CDD5

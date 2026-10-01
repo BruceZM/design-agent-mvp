@@ -1,3 +1,4 @@
+# 离线协议测试：验证真正的请求序列化/响应适配，不使用真实 API key 或网络服务。
 import asyncio
 import base64
 import json
@@ -11,6 +12,8 @@ from app.config import Settings
 
 
 def test_glm_thinking_survives_a_tool_round_trip(monkeypatch):
+    # MockTransport 捕获实际 SDK 请求：第一轮返回工具调用，第二轮验证推理字段回传。
+    # 这是协议形状回归测试，不证明远程模型服务此刻可用。
     requests = []
 
     def respond(request):
@@ -20,6 +23,7 @@ def test_glm_thinking_survives_a_tool_round_trip(monkeypatch):
         assert body["thinking"] == {"type": "enabled", "clear_thinking": False}
         assert body["reasoning_effort"] == "low"
         if len(requests) == 1:
+            # 模拟 GLM 非流式 tool_calls 响应，包含标准适配容易丢弃的扩展字段。
             message = {
                 "role": "assistant",
                 "content": "",
@@ -46,6 +50,7 @@ def test_glm_thinking_survives_a_tool_round_trip(monkeypatch):
         })
 
     actual_client = models.GLMChatOpenAI
+    # 只替换模型工厂所用的 HTTP 客户端，仍运行真实 GLMChatOpenAI 两个适配方法。
     with httpx.Client(transport=httpx.MockTransport(respond)) as transport:
         monkeypatch.setattr(models, "GLMChatOpenAI", lambda **kwargs: actual_client(
             http_client=transport, **kwargs,
@@ -64,6 +69,7 @@ def test_glm_thinking_survives_a_tool_round_trip(monkeypatch):
 
 
 def test_multimodal_parser_sends_original_image_and_marks_provenance(tmp_path, monkeypatch):
+    # 这里测试发送内容，不测试图片格式校验；上传校验有独立测试覆盖。
     image = tmp_path / "design.png"
     image.write_bytes(b"original-image-fixture")
     settings = Settings(api_key="fake-vision-test-key", vision_mode="remote", vision_model="glm-5.3-flash")
@@ -74,6 +80,7 @@ def test_multimodal_parser_sends_original_image_and_marks_provenance(tmp_path, m
             assert blocks[0]["type"] == "text" and blocks[0]["text"]
             assert blocks[1]["type"] == "image_url"
             assert base64.b64decode(blocks[1]["image_url"]["url"].split(",", 1)[1]) == image.read_bytes()
+            # 解码后逐字节比较，确认送的是原图，不是 OCR 文本或占位图片。
             return type("Reply", (), {"content": "## 可见状态\n搜索结果 6；颜色为估计值。"})()
 
     def create_model(config, *, vision=False):
@@ -87,6 +94,7 @@ def test_multimodal_parser_sends_original_image_and_marks_provenance(tmp_path, m
 
 
 def test_multimodal_failure_stops_without_ocr_fallback(tmp_path, monkeypatch):
+    # 模型失败必须显式停止，不悄悄退回旧 OCR 后假装设计稿已理解。
     image = tmp_path / "design.png"
     image.write_bytes(b"fixture")
     settings = Settings(api_key="fake-vision-test-key", vision_mode="remote")

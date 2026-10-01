@@ -1,13 +1,20 @@
+# Python 项目元数据与依赖声明，uv sync --locked 按 uv.lock 安装精确版本。
+# 此文件可写 TOML 注释；package.json/tsconfig.json 的学习说明放在阅读指南。
 [project]
 name = "design-agent"
 version = "0.1.0"
 description = "Fixed local repository design-to-code MVP"
+# 后端使用 asyncio.timeout、datetime.UTC 等特性，项目约束 Python 3.12/3.13。
 requires-python = ">=3.12,<3.14"
+# FastAPI/uvicorn/multipart：HTTP 和上传；LangChain/LangGraph：模型与工作流。
+# Pillow/pypdf/python-docx：材料解析；dotenv：配置；httpx[socks]：兼容本地代理。
 dependencies = ["fastapi>=0.115,<1", "uvicorn>=0.30,<1", "python-multipart>=0.0.20", "langchain>=1.0,<2", "langchain-openai>=1.0,<2", "langgraph>=1.0,<2", "pillow>=11,<13", "pypdf>=5,<7", "python-docx>=1.1,<2", "python-dotenv>=1.0,<2", "httpx[socks]>=0.28,<1"]
 
 [dependency-groups]
+# pytest 仅在开发验证时使用，测试替换真实模型，避免产生付费调用。
 dev = ["pytest>=8,<10"]
 
 [tool.pytest.ini_options]
+# 让测试 import app 时解析到 backend/app，无需把 backend 手工复制进测试目录。
 pythonpath = ["backend"]
 testpaths = ["tests"]
