@@ -1,5 +1,11 @@
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Pencil, ArrowUpRight } from "lucide-react";
+import { useRef, useState } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Pencil,
+  ArrowUpRight,
+  Search,
+} from "lucide-react";
 import { STATUSES, type Customer } from "../types";
 interface Props {
   customers: Customer[];
@@ -9,19 +15,71 @@ interface Props {
 const PAGE_SIZE = 8;
 export function CustomerList({ customers, onView, onEdit }: Props) {
   const [page, setPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(customers.length / PAGE_SIZE));
+  const [keyword, setKeyword] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const trimmed = keyword.trim();
+  const lower = trimmed.toLowerCase();
+  const filtered = lower
+    ? customers.filter(
+        (c) =>
+          c.name.toLowerCase().includes(lower) ||
+          (c.company ?? "").toLowerCase().includes(lower) ||
+          (c.phone ?? "").includes(trimmed),
+      )
+    : customers;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
-  const rows = customers.slice(
+  const rows = filtered.slice(
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE,
   );
+  const searching = Boolean(trimmed);
+  const clearSearch = () => {
+    setKeyword("");
+    setPage(1);
+    inputRef.current?.focus();
+  };
   return (
     <section className="list-card" aria-label="客户列表">
       <div className="list-heading">
         <h2>
-          全部客户 <span>{customers.length}</span>
+          {searching ? (
+            <>搜索结果 <span>{filtered.length}</span></>
+          ) : (
+            <>
+              全部客户 <span>{customers.length}</span>
+            </>
+          )}
         </h2>
         <span className="muted">及时更新，让跟进更有序</span>
+      </div>
+      <div className="search-bar">
+        <label className="sr-only" htmlFor="customer-search">
+          搜索客户
+        </label>
+        <div className="search-input">
+          <Search size={15} aria-hidden="true" />
+          <input
+            id="customer-search"
+            ref={inputRef}
+            type="search"
+            value={keyword}
+            placeholder="搜索姓名、公司或手机号"
+            onChange={(e) => {
+              setKeyword(e.target.value);
+              setPage(1);
+            }}
+          />
+        </div>
+        <button
+          type="button"
+          className="secondary"
+          disabled={!searching}
+          onClick={clearSearch}
+        >
+          清空搜索
+        </button>
+        <span className="muted search-hint">按姓名、公司或手机号搜索</span>
       </div>
       <div className="table-wrap">
         <table>
@@ -99,15 +157,24 @@ export function CustomerList({ customers, onView, onEdit }: Props) {
           </article>
         ))}
       </div>
-      {!rows.length && (
+      {!rows.length && !searching && (
         <div className="empty">
           <h3>还没有客户</h3>
           <p>点击「新增客户」，建立第一份客户档案。</p>
         </div>
       )}
+      {!rows.length && searching && (
+        <div className="empty">
+          <h3>没有找到匹配的客户</h3>
+          <p>试试其他姓名、公司或手机号，或清空搜索。</p>
+          <button type="button" className="secondary" onClick={clearSearch}>
+            清空搜索
+          </button>
+        </div>
+      )}
       <footer className="pagination">
         <span>
-          共 {customers.length} 位客户 · 每页 {PAGE_SIZE} 条
+          共 {filtered.length} 位客户 · 每页 {PAGE_SIZE} 条
         </span>
         <div>
           <button
