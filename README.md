@@ -19,7 +19,7 @@
 
 项目流程见 [静态 HTML 流程图](docs/flows/index.html) 与 [Markdown / Mermaid 源文档](docs/项目流程图.md)，包含系统架构、任务时序、LangGraph、模型工具循环和 Git 交付五张图。
 
-学习源码从 [代码阅读指南](design-agent/docs/代码阅读指南.md) 开始。Agent 前后端、模型适配、测试与启动脚本均补有中文注释，说明各步骤的职责、写法和边界。
+后台 Agent 的执行流程从 [代码阅读指南](design-agent/docs/代码阅读指南.md) 开始，按真实调用顺序说明材料解析、计划、模型工具循环、检查修复与交付。Agent 源码已有中文注释，可逐个函数对照阅读。
 
 需要 Git、Node.js 22.12+、Python 3.12 和 uv。
 

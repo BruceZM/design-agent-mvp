@@ -1,14 +1,14 @@
-flowchart TB
+flowchart LR
     accTitle: 编码 Agent 内部的模型与工具循环
     accDescr: 预载需求、计划与源码后，先检查模型调用预算；模型返回工具调用时由本地工具执行并回传结果，无工具调用时返回摘要。
-    CONTEXT["输入开发上下文<br/>PRD / 设计说明 / 计划<br/>预载 README 与相关源码"] --> B{"预算与时间可用？"}
-    B -->|是| MODEL["调用 glm-5.3-flash<br/>保留 reasoning_content"]
-    B -->|否| ERROR["抛出异常<br/>交给外层工作流保存失败"]
+    CONTEXT["开发上下文<br/>需求 / 设计 / 计划 / 源码"] --> B{"预算 / 时间可用？"}
+    B -->|是| MODEL["GLM 调用<br/>保留思考上下文"]
+    B -->|否| ERROR["抛出异常<br/>外层保存失败"]
     MODEL --> Q{"返回 tool_calls？"}
-    Q -->|有| TOOLS["本地 tools 执行<br/>list_files / read_file<br/>write_file / replace_text<br/>run_check"]
-    TOOLS --> RESULT["ToolMessage 回传<br/>文件内容 / 操作结果 / 拒绝原因"]
+    Q -->|有| TOOLS["本地工具执行<br/>list_files / read_file<br/>write_file / replace_text<br/>run_check"]
+    TOOLS --> RESULT["ToolMessage<br/>结果 / 拒绝原因"]
     RESULT --> B
-    Q -->|没有| SUMMARY(["返回中文开发摘要<br/>外层继续独立 check"])
+    Q -->|没有| SUMMARY(["开发摘要<br/>外层独立 check"])
     classDef base fill:#E1F4FF,stroke:#0878F9,color:#202B38,stroke-width:1.5px;
     classDef decision fill:#FFF3C7,stroke:#F5A623,color:#202B38,stroke-width:1.5px;
     classDef tool fill:#E8E6FF,stroke:#7966E8,color:#202B38,stroke-width:1.5px;

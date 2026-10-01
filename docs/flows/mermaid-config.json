@@ -3,7 +3,7 @@
   "securityLevel": "strict",
   "fontFamily": "PingFang SC, Microsoft YaHei, Noto Sans CJK SC, Arial, sans-serif",
   "themeVariables": {
-    "fontSize": "18px",
+    "fontSize": "17px",
     "primaryColor": "#E1F4FF",
     "primaryBorderColor": "#0878F9",
     "primaryTextColor": "#202B38",
@@ -24,21 +24,27 @@
   "flowchart": {
     "htmlLabels": false,
     "curve": "basis",
-    "nodeSpacing": 35,
-    "rankSpacing": 38,
-    "padding": 14,
+    "nodeSpacing": 24,
+    "rankSpacing": 25,
+    "padding": 10,
     "useMaxWidth": false,
     "wrappingWidth": 480,
-    "minNodeWidth": 120
+    "minNodeWidth": 0
   },
   "sequence": {
     "useMaxWidth": false,
-    "actorMargin": 40,
-    "width": 160,
-    "height": 66,
-    "messageMargin": 36,
-    "noteMargin": 16,
-    "mirrorActors": true
+    "actorMargin": 28,
+    "width": 136,
+    "height": 46,
+    "messageMargin": 8,
+    "noteMargin": 5,
+    "mirrorActors": false,
+    "actorFontSize": 16,
+    "messageFontSize": 15,
+    "noteFontSize": 14,
+    "boxMargin": 5,
+    "boxTextMargin": 4,
+    "diagramMarginY": 6
   },
   "markdownAutoWrap": false
 }

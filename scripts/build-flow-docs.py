@@ -29,62 +29,99 @@ PAGE = r'''<!doctype html>
 <title>Design Agent MVP · 项目流程图</title>
 <style>
 :root{--ink:#202b38;--muted:#627083;--line:#dce3eb;--blue:#0878f9;--panel:#f5f7fa}
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:30px}
-body{margin:0;background:#fff;color:var(--ink);font:16px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{margin:0;height:100%;overflow:hidden}
+body{background:#fff;color:var(--ink);font:14px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
 a{color:#126ac3;text-decoration:none}a:hover{text-decoration:underline}
-button,.button{font:inherit;line-height:1.4;background:#fff;border:1px solid #cbd6e3;border-radius:7px;color:#3c4b5e;padding:7px 12px;cursor:pointer;white-space:nowrap}
-button:hover,.button:hover{background:#edf6ff;border-color:#83b5ee;text-decoration:none}button:focus-visible,a:focus-visible{outline:3px solid #93c4ff;outline-offset:3px}
-.page{max-width:1480px;margin:auto;padding:48px 40px 32px}.eyebrow{font-size:13px;letter-spacing:1.8px;color:#376ca7;font-weight:650}
-h1{font-size:40px;line-height:1.3;letter-spacing:-1px;margin:12px 0}h2{font-size:26px;line-height:1.4;margin:0 0 10px}p{margin:0 0 16px}
-.lede{max-width:860px;color:var(--muted);font-size:17px}.top-actions{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0 26px}.badge{background:#eef5fc;border:1px solid #d8e7f7;padding:4px 11px;border-radius:6px;color:#3d6388;font-size:13px}
-.intro{padding:16px 20px;background:#f6f8fb;border:1px solid var(--line);border-radius:10px;margin-bottom:34px}.intro p{margin:0;color:#536174;font-size:14px}
-.layout{display:grid;grid-template-columns:180px minmax(0,1fr);gap:30px;align-items:start}
-nav{position:sticky;top:28px;padding-right:12px}nav span{display:block;font-size:12px;color:#8290a0;margin-bottom:10px}nav a{display:block;padding:9px 10px;margin-bottom:5px;border-radius:6px;color:#526176;font-size:14px}nav a:hover{background:#eef5fc;text-decoration:none;color:#126ac3}
-.card{margin:0 0 42px;scroll-margin-top:28px;min-width:0}.card-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.tag{color:#537da6;font-size:12px;letter-spacing:1px;font-weight:650;margin-bottom:7px}.description{color:var(--muted);font-size:15px;max-width:850px}
-.controls{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:12px 14px;border:1px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0;background:#fafbfd}.controls button{font-size:13px;padding:6px 10px}.scale{font-size:12px;color:#778699;min-width:43px;text-align:center}.download-group{display:flex;gap:7px;margin-left:auto}
-.viewport{background:var(--panel);border:1px solid var(--line);border-radius:0 0 10px 10px;padding:24px 18px;max-height:920px;overflow:auto;overscroll-behavior:contain}.diagram{display:block;max-width:none;height:auto;margin:0 auto}
-.notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}.note{font-size:13px;line-height:1.8;color:#59687a;background:#fff;border:1px solid #e7ecf2;padding:12px 14px;border-radius:8px}.note b{display:block;color:#34485e;font-size:12px;margin-bottom:3px}
-.sources{font-size:12px;color:#8490a0;display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.sources a{color:#6c8096}
-.footer{margin-top:38px;padding-top:22px;border-top:1px solid var(--line);font-size:13px;color:#7a8798}.footer p{margin:0 0 8px}#status{position:fixed;right:24px;bottom:20px;border:1px solid #cbd6e3;background:#fff;padding:9px 16px;border-radius:8px;box-shadow:0 3px 18px #202b3812;display:none;font-size:14px}
-@media(max-width:850px){.page{padding:28px 18px}.layout{display:block}nav{position:static;display:flex;overflow:auto;gap:4px;margin-bottom:24px;padding:0}nav span{display:none}nav a{white-space:nowrap;background:#f5f7fa;margin:0}h1{font-size:31px}h2{font-size:22px}.notes{grid-template-columns:1fr}.viewport{padding:18px 12px}.card{margin-bottom:32px}.controls{gap:5px}.download-group{margin-left:0}button{font-size:12px}}
-@media print{@page{size:A3 portrait;margin:14mm}body{font-size:12pt}.page{max-width:none;padding:0}header{break-after:page}.layout{display:block}nav,.controls,.top-actions,#status{display:none!important}.card{break-before:page;margin:0}.card:first-child{break-before:auto}.viewport{border-color:#cbd3df;max-height:none;overflow:visible;padding:12px}.diagram{width:auto!important;max-width:100%;max-height:265mm;height:auto}.notes{grid-template-columns:repeat(3,minmax(0,1fr))}.sources{font-size:9pt}h1{font-size:24pt}h2{font-size:20pt}.intro{margin-bottom:20px}}
+button,.button{font:inherit;line-height:1.4;background:#fff;border:1px solid #cbd6e3;border-radius:7px;color:#3c4b5e;padding:6px 10px;cursor:pointer;white-space:nowrap}
+button:hover,.button:hover{background:#edf6ff;border-color:#83b5ee;text-decoration:none}button:disabled{opacity:.4;cursor:default}
+button:focus-visible,a:focus-visible,.viewport:focus-visible{outline:3px solid #93c4ff;outline-offset:3px}
+.page{height:100vh;height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:14px;padding:18px 24px}
+.page-header{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:10px;letter-spacing:1.5px;color:#376ca7;font-weight:650}h1{font-size:22px;line-height:1.4;margin:2px 0 0;letter-spacing:-.4px}
+.top-actions{display:flex;gap:8px;flex-shrink:0}.top-actions .button,.top-actions button{font-size:12px}
+.layout{display:grid;grid-template-columns:174px minmax(0,1fr);gap:22px;min-height:0;min-width:0}
+nav{min-height:0;overflow:auto;padding-right:4px}nav span{display:block;font-size:11px;color:#8290a0;margin-bottom:9px}
+nav a{display:block;padding:10px 10px;margin-bottom:7px;border:1px solid transparent;border-radius:7px;color:#526176;font-size:13px;line-height:1.7}
+nav a:hover{background:#f5f7fa;text-decoration:none}nav a[aria-current="page"]{background:#edf6ff;border-color:#c8dff8;color:#126ac3;font-weight:600}
+main{min-height:0;min-width:0}.card{height:100%;min-height:0;min-width:0;display:grid;grid-template-rows:auto auto minmax(0,1fr)}
+.card-head{margin-bottom:10px}.tag{font-size:10px;letter-spacing:1px;color:#537da6;font-weight:650}h2{font-size:20px;line-height:1.4;margin:2px 0 4px}
+.description{color:var(--muted);font-size:12px;margin:0}.controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 10px;border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;background:#fafbfd}
+.controls button{font-size:12px}.scale{min-width:40px;text-align:center;color:#778699;font-size:11px}.download-group{display:flex;gap:6px;margin-left:auto}
+.viewport{min-height:0;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:0 0 9px 9px;padding:12px;overflow:auto;overscroll-behavior:contain}
+.diagram{display:block;max-width:none;margin:0 auto}.reading{display:none}.notes{display:grid;gap:10px}.note{border:1px solid #e7ecf2;border-radius:8px;padding:12px 14px;color:#59687a;font-size:13px;line-height:1.8}.note b{display:block;font-size:12px;color:#34485e;margin-bottom:3px}
+.sources{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:#8490a0;margin-top:14px}.sources a{color:#6c8096}
+.footer{display:flex;justify-content:space-between;align-items:center;gap:12px;color:#7a8798;font-size:11px}.legend{display:flex;gap:14px;flex-wrap:wrap}.legend span{display:inline-flex;align-items:center;gap:5px}.swatch{width:8px;height:8px;border-radius:2px;display:inline-block}
+.pager{display:flex;align-items:center;gap:8px;flex-shrink:0}.pager button{font-size:11px;padding:4px 9px}.counter{min-width:35px;text-align:center}
+dialog{padding:22px;border:1px solid var(--line);border-radius:12px;max-width:620px;width:calc(100% - 32px);max-height:calc(100dvh - 40px);color:var(--ink)}dialog::backdrop{background:#172c4855}.dialog-head{display:flex;justify-content:space-between;gap:20px;align-items:start;margin-bottom:12px}.dialog-description{color:var(--muted);font-size:13px;margin:0 0 14px}
+#status{position:fixed;right:22px;bottom:55px;background:#fff;border:1px solid #cbd6e3;border-radius:8px;padding:8px 14px;font-size:13px;box-shadow:0 3px 18px #202b3812;display:none}
+@media(max-width:850px){.page{padding:12px;gap:10px}.page-header{gap:10px;padding-bottom:8px}.eyebrow{font-size:9px}h1{font-size:18px}.layout{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);gap:10px}nav{display:flex;gap:5px;padding:0}nav span{display:none}nav a{white-space:nowrap;padding:6px 9px;margin:0;font-size:12px;background:#f5f7fa}h2{font-size:18px}.card-head{margin-bottom:8px}.description{font-size:11px}.legend{display:none}.footer{justify-content:flex-end}.controls{gap:4px;padding:7px}.controls button{font-size:11px;padding:5px 7px}.download-group{gap:4px}.viewport{padding:8px}}
+@media(max-width:520px){.top-actions .button{display:none}.top-actions button{font-size:11px}.description{display:none}.tag{font-size:9px}.download-group{margin-left:0}.footer{font-size:10px}h1{font-size:17px}}
+@media(max-height:540px){.page{padding:8px 12px;gap:7px}.eyebrow,.description{display:none}.page-header{padding-bottom:6px}h1{font-size:17px}.card-head{margin-bottom:5px}h2{font-size:16px}.controls{padding:5px 8px}.footer{font-size:10px}}
+@media print{@page{size:A3 portrait;margin:14mm}html,body{height:auto;overflow:visible}.page{height:auto;display:block;padding:0}.page-header,nav,.controls,.footer,dialog,#status{display:none!important}.layout,main{display:block}.card,.card[hidden]{display:block!important;height:auto;break-before:page}.card:first-child{break-before:auto}.viewport{height:auto;overflow:visible;padding:12px}.diagram{width:auto!important;height:auto!important;max-width:100%;max-height:250mm;margin:0 auto!important}.reading{display:block}.notes{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:16px}.description{display:block}.sources{font-size:9pt}h2{font-size:20pt}}
 </style>
 </head>
 <body>
 <div class="page">
-<header>
-<div class="eyebrow">DESIGN AGENT / MVP DOCUMENTATION</div>
-<h1>从设计稿到任务分支</h1>
-<p class="lede">五张流程图，串起上传、后台执行、模型工具调用和代码交付。图中每一步均按当前实现整理，可对照源码阅读。</p>
-<div class="top-actions"><span class="badge">React + FastAPI</span><span class="badge">LangGraph + LangChain</span><span class="badge">GLM-5.3-Flash</span><a class="button" href="../项目流程图.md" target="_blank" rel="noopener">阅读 Markdown 源文档</a><button type="button" id="print">打印 / 保存 PDF</button></div>
-<div class="intro"><p><strong>当前版本：</strong>2026-10-01 · 固定本地 CRM · 单线程串行队列 · HTTP 轮询 · 默认一次检查修复。浅蓝表示处理节点，黄色表示判断，紫色表示编码工具，绿色 / 红色表示成功 / 失败结果，虚线表示异常路径或明确标出的人工步骤。</p></div>
+<header class="page-header">
+<div><div class="eyebrow">DESIGN AGENT / MVP DOCUMENTATION</div><h1>从设计稿到任务分支</h1></div>
+<div class="top-actions"><a class="button" href="../项目流程图.md" target="_blank" rel="noopener">Markdown 源文档</a><button type="button" id="print">打印 / 保存 PDF</button></div>
 </header>
-<div class="layout"><nav aria-label="图表导航"><span>阅读顺序</span>__NAV__</nav><main>__CARDS__</main></div>
-<footer class="footer"><p>HTML 内嵌五张 SVG，离线打开即可查看；源码位于 sources/，独立矢量图位于 svg/。页面缩放和导出使用浏览器原生功能，不依赖 CDN。</p><p>后台未实现自动浏览器 / 视觉验收、自动 GitHub 推送、RAG 或进程重启后的节点续跑。查看 <a href="https://github.com/BruceZM/design-agent-mvp">项目仓库</a> 或 <a href="https://github.com/mermaid-js/mermaid-cli">Mermaid CLI 渲染工具</a>。</p></footer>
-</div><div id="status" role="status" aria-live="polite"></div>
+<div class="layout"><nav aria-label="图表导航"><span>点击切换 · 每屏一张完整图</span>__NAV__</nav><main>__CARDS__</main></div>
+<footer class="footer"><div class="legend"><span><i class="swatch" style="background:#a9dcff"></i>处理节点</span><span><i class="swatch" style="background:#ffe28e"></i>条件判断</span><span><i class="swatch" style="background:#c2b8fa"></i>编码工具</span><span>虚线：异常 / 人工步骤</span></div><div class="pager"><button type="button" id="previous">上一张</button><span class="counter" aria-live="polite"></span><button type="button" id="next">下一张</button></div></footer>
+</div>
+<dialog id="details"><div class="dialog-head"><h2 id="details-title"></h2><button type="button" id="close-details">关闭</button></div><div id="details-content"></div></dialog>
+<div id="status" role="status" aria-live="polite"></div>
 <script>
-// SVG 已嵌入页面；这里仅控制显示尺寸，不重新计算图表布局。
-const statusBox = document.getElementById('status');
-let statusTimer;
-function report(message){statusBox.textContent=message;statusBox.style.display='block';clearTimeout(statusTimer);statusTimer=setTimeout(()=>statusBox.style.display='none',3500)}
-function save(blob,name){const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-for(const card of document.querySelectorAll('.card')){
+// 一次显示一张图；说明另放弹窗，不占图表的屏幕高度。
+const cards=[...document.querySelectorAll('.card')],links=[...document.querySelectorAll('nav a')];
+const fitters=new Map(),statusBox=document.getElementById('status'),details=document.getElementById('details');
+let current=0,statusTimer;
+function report(message){statusBox.textContent=message;statusBox.style.display='block';clearTimeout(statusTimer);statusTimer=setTimeout(()=>statusBox.style.display='none',2500)}
+function save(blob,name){const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+for(const card of cards){
   const img=card.querySelector('.diagram'),viewport=card.querySelector('.viewport'),label=card.querySelector('.scale');
-  const width=Number(img.dataset.width),height=Number(img.dataset.height);let scale=1;
-  function fit(){const padding=parseFloat(getComputedStyle(viewport).paddingLeft)+parseFloat(getComputedStyle(viewport).paddingRight);return Math.min(1,(viewport.clientWidth-padding)/width)}
-  function apply(value){scale=Math.max(.15,Math.min(3,value));img.style.width=(width*scale)+'px';label.textContent=Math.round(scale*100)+'%'}
-  apply(fit());
-  card.querySelector('[data-action="in"]').addEventListener('click',()=>apply(scale*1.25));
-  card.querySelector('[data-action="out"]').addEventListener('click',()=>apply(scale/1.25));
-  card.querySelector('[data-action="fit"]').addEventListener('click',()=>apply(fit()));
-  // 解码嵌入的 SVG 字节，不通过 fetch 读取 file://，避免浏览器本地文件限制。
+  const width=Number(img.dataset.width),height=Number(img.dataset.height);let scale=1,autoFit=true;
+  function space(){const css=getComputedStyle(viewport);return {width:Math.max(1,viewport.clientWidth-parseFloat(css.paddingLeft)-parseFloat(css.paddingRight)-2),height:Math.max(1,viewport.clientHeight-parseFloat(css.paddingTop)-parseFloat(css.paddingBottom)-2)}}
+  function apply(value){scale=Math.max(.001,Math.min(3,value));const room=space();img.style.width=width*scale+'px';img.style.height=height*scale+'px';img.style.marginTop=Math.max(0,(room.height-height*scale)/2)+'px';label.textContent=Math.round(scale*100)+'%'}
+  function fit(){if(card.hidden)return;autoFit=true;const room=space();apply(Math.min(1,room.width/width,room.height/height));viewport.scrollTop=0;viewport.scrollLeft=0}
+  // 宽度、高度同时参与缩放，不设 15% 的下限，窄屏也能先看到整张图。
+  fitters.set(card.id,fit);
+  new ResizeObserver(()=>{if(autoFit)fit()}).observe(viewport);
+  card.querySelector('[data-action="in"]').addEventListener('click',()=>{autoFit=false;apply(scale*1.25)});
+  card.querySelector('[data-action="out"]').addEventListener('click',()=>{autoFit=false;apply(scale/1.25)});
+  card.querySelector('[data-action="fit"]').addEventListener('click',fit);
+  card.querySelector('[data-action="details"]').addEventListener('click',()=>{
+    document.getElementById('details-title').textContent=card.querySelector('h2').textContent;
+    const content=document.getElementById('details-content');content.replaceChildren();
+    const description=card.querySelector('.description').cloneNode(true);description.className='dialog-description';content.append(description);
+    for(const child of card.querySelector('.reading').children)content.append(child.cloneNode(true));
+    details.showModal();
+  });
+  // 导出始终使用原始 SVG，与显示缩放比例无关，避免导出模糊的小图。
   const bytes=Uint8Array.from(atob(img.src.split(',')[1]),c=>c.charCodeAt(0));
   card.querySelector('[data-action="svg"]').addEventListener('click',()=>{save(new Blob([bytes],{type:'image/svg+xml'}),card.id+'.svg');report('SVG 已准备下载')});
   card.querySelector('[data-action="png"]').addEventListener('click',()=>{
     try{const ratio=Math.min(2,4608/width,4608/height),canvas=document.createElement('canvas');canvas.width=Math.ceil(width*ratio);canvas.height=Math.ceil(height*ratio);const context=canvas.getContext('2d');context.fillStyle='#f5f7fa';context.fillRect(0,0,canvas.width,canvas.height);context.drawImage(img,0,0,canvas.width,canvas.height);canvas.toBlob(blob=>{if(blob){save(blob,card.id+'.png');report('PNG 已准备下载')}else report('PNG 导出失败，请使用 SVG')},'image/png')}catch(error){report('PNG 导出失败，请使用 SVG')}
   });
-  window.addEventListener('resize',()=>apply(fit()));
 }
+function show(index,updateHash=true){
+  current=Math.max(0,Math.min(cards.length-1,index));
+  cards.forEach((card,i)=>{card.hidden=i!==current;if(i===current)links[i].setAttribute('aria-current','page');else links[i].removeAttribute('aria-current')});
+  document.querySelector('.counter').textContent=(current+1)+' / '+cards.length;
+  document.getElementById('previous').disabled=current===0;document.getElementById('next').disabled=current===cards.length-1;
+  if(updateHash)history.replaceState(null,'','#'+cards[current].id);
+  requestAnimationFrame(()=>fitters.get(cards[current].id)());
+}
+links.forEach((link,i)=>link.addEventListener('click',event=>{event.preventDefault();show(i)}));
+document.getElementById('previous').addEventListener('click',()=>show(current-1));
+document.getElementById('next').addEventListener('click',()=>show(current+1));
+document.getElementById('close-details').addEventListener('click',()=>details.close());
+details.addEventListener('click',event=>{if(event.target===details)details.close()});
+function fromHash(){const index=cards.findIndex(card=>'#'+card.id===location.hash);show(index<0?0:index,false)}
+window.addEventListener('hashchange',fromHash);
+// 真正改变窗口大小时重新适配；手动放大出现滚动条时保留用户缩放。
+window.addEventListener('resize',()=>fitters.get(cards[current].id)());fromHash();
 document.getElementById('print').addEventListener('click',()=>window.print());
 </script>
 </body>
@@ -121,7 +158,7 @@ def main():
     markdown = [
         "# Design Agent MVP 项目流程图\n",
         "日期：2026-10-01。按当前代码整理，默认模型为 `glm-5.3-flash`。\n",
-        "推荐打开 [离线 HTML 展示页](flows/index.html)，支持缩放、下载 SVG/PNG 与打印。本文保存说明及 Mermaid 源码；GitHub 可以直接渲染代码块。\n",
+        "推荐打开 [离线 HTML 展示页](flows/index.html)，默认按屏幕宽高显示一张完整图，点击菜单切换，支持缩放、下载 SVG/PNG 与打印。本文保存说明及 Mermaid 源码；GitHub 可以直接渲染代码块。\n",
     ]
     for number, item in enumerate(diagrams, 1):
         # 同一份 .mmd 分别用于独立 SVG、HTML 内嵌图和 Markdown 代码块，避免三份图漂移。
@@ -140,9 +177,9 @@ def main():
         nav.append(f'<a href="#{name}">{number:02d} · {title}</a>')
         notes = "".join(f'<div class="note"><b>阅读要点 {i}</b>{html.escape(note)}</div>' for i, note in enumerate(item["notes"], 1))
         links = "".join(f'<a href="{REPO_URL}/blob/main/{path}">{Path(path).name}</a>' for path in item["sources"])
-        cards.append(f'''<section class="card" id="{name}"><div class="card-head"><div><div class="tag">{number:02d} / {html.escape(item['tag'])}</div><h2>{title}</h2><p class="description">{intro}</p></div></div>
-<div class="controls" aria-label="{title}的图表操作"><button type="button" data-action="out" aria-label="缩小{title}">−</button><span class="scale">100%</span><button type="button" data-action="in" aria-label="放大{title}">+</button><button type="button" data-action="fit">适应宽度</button><div class="download-group"><button type="button" data-action="svg">下载 SVG</button><button type="button" data-action="png">下载 PNG</button></div></div>
-<div class="viewport" tabindex="0" aria-label="{title}，放大后可滚动"><img class="diagram" alt="{title}流程图" data-width="{width}" data-height="{height}" width="{width}" height="{height}" src="data:image/svg+xml;base64,{encoded}"></div><div class="notes">{notes}</div><div class="sources"><span>对照源码</span>{links}</div></section>''')
+        cards.append(f'''<section class="card" id="{name}"{' hidden' if number > 1 else ''}><div class="card-head"><div><div class="tag">{number:02d} / {html.escape(item['tag'])}</div><h2>{title}</h2><p class="description">{intro}</p></div></div>
+<div class="controls" aria-label="{title}的图表操作"><button type="button" data-action="out" aria-label="缩小{title}">−</button><span class="scale">100%</span><button type="button" data-action="in" aria-label="放大{title}">+</button><button type="button" data-action="fit">适应屏幕</button><div class="download-group"><button type="button" data-action="details">图解 / 源码</button><button type="button" data-action="svg">下载 SVG</button><button type="button" data-action="png">下载 PNG</button></div></div>
+<div class="viewport" tabindex="0" aria-label="{title}，放大后可滚动"><img class="diagram" alt="{title}流程图" data-width="{width}" data-height="{height}" width="{width}" height="{height}" src="data:image/svg+xml;base64,{encoded}"></div><div class="reading"><div class="notes">{notes}</div><div class="sources"><span>对照源码</span>{links}</div></div></section>''')
         markdown.extend([f"## {number}. {item['title']}\n", item["intro"] + "\n", "```mermaid\n" + source.read_text().rstrip() + "\n```\n"])
         markdown.extend("- " + note for note in item["notes"])
         markdown.append("\n源码：" + "、".join(f"[{Path(p).name}](../{p})" for p in item["sources"]) + f"。独立矢量图：[SVG](flows/svg/{name}.svg)。\n")

@@ -6,7 +6,7 @@
 
 ## 学习入口
 
-源码已补充中文注释。建议先看 [代码阅读指南](docs/代码阅读指南.md)，再对照 [项目流程图](../docs/项目流程图.md) 阅读 `frontend/src/App.tsx` → `backend/app/main.py` → `worker.py` → `workflow.py` → `agent.py`。
+后台 Agent 的调用顺序见 [代码阅读指南](docs/代码阅读指南.md)：`main.submit` → `Worker.loop` → `Workflow.run` → 六个执行节点 → `Developer` 模型工具循环。可对照 [项目流程图](../docs/项目流程图.md) 阅读函数内的中文注释。
 
 ## 启动
 

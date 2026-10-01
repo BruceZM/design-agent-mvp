@@ -1,37 +1,37 @@
 flowchart TB
     accTitle: Design Agent MVP 系统架构
-    accDescr: React 前端经 HTTP 调用 FastAPI；SQLite 保存任务与事件；串行 Worker 运行 LangGraph，使用 GLM 和受限工具修改独立 CRM worktree。
-    subgraph FRONT[前端 · React + TypeScript + Vite]
-        UI["材料上传 / 提交确认<br/>任务详情 / 差异 / 应用预览"]
+    accDescr: React 经 HTTP 调用 FastAPI；后端的串行 Worker 执行 LangGraph，调用 GLM 和本地工具；SQLite 与任务目录保存状态和产物，CRM worktree 隔离源码改动。
+    subgraph FRONT[用户工作台]
+        UI["React + TypeScript<br/>上传 / 进度 / 差异 / 预览"]
     end
     subgraph BACK[后端 · FastAPI]
-        API["HTTP API<br/>校验材料 / 幂等提交 / 查询任务"]
-        WORKER["单线程串行 Worker<br/>从 SQLite 取 queued 任务"]
-        GRAPH["LangGraph 工作流<br/>含 LangChain 开发 Agent"]
-        API -->|唤醒| WORKER
-        WORKER -->|逐个执行| GRAPH
+        direction LR
+        API["HTTP API<br/>校验 / 幂等 / 查询"] -->|notify| WORKER["串行 Worker<br/>读取 queued 任务"]
+        WORKER -->|run| GRAPH["LangGraph<br/>六阶段 + 开发 Agent"]
     end
-    subgraph MODEL[外部模型 · Coding Plan 兼容入口]
-        GLM["glm-5.3-flash<br/>原图识别 / 开发计划 / 编码决策"]
+    subgraph MODEL[模型服务]
+        GLM["glm-5.3-flash<br/>识图 / 计划 / 编码"]
     end
-    subgraph LOCAL[本地数据与代码]
-        DB[("SQLite<br/>任务快照 / revision / 事件 seq")]
-        FILES["runtime/tasks/任务-id<br/>材料 / 设计说明 / 计划 / 日志 / 报告"]
-        BASE["customer-manager · main<br/>固定 CRM 基线"]
-        WT["runtime/worktrees/任务-id<br/>隔离分支 / src / 构建产物"]
-        BASE -->|git worktree add| WT
+    subgraph DATA[任务数据]
+        direction LR
+        DB[("SQLite<br/>任务快照 / 事件")]
+        FILES["runtime/tasks<br/>材料 / 日志 / 报告"]
+        DB ~~~ FILES
     end
-    UI -->|POST 上传 · GET 查询| API
-    API -->|读写任务| DB
-    GRAPH -->|阶段状态与事件| DB
-    GRAPH -->|写入过程产物| FILES
-    GRAPH -->|原图识别 / 计划 / 编码| GLM
-    GRAPH -->|受限文件工具 / 固定检查| WT
+    subgraph REPO[本地 CRM]
+        direction LR
+        BASE["main<br/>固定基线"] -->|创建| WT["独立 worktree<br/>分支 / src / dist"]
+    end
+    FRONT -->|HTTP 上传 / 查询| BACK
+    BACK -->|模型调用| MODEL
+    BACK -->|读写快照与产物| DATA
+    BACK -->|工具 / 检查 / 预览| REPO
     classDef base fill:#E1F4FF,stroke:#0878F9,color:#202B38,stroke-width:1.5px;
     classDef tool fill:#E8E6FF,stroke:#7966E8,color:#202B38,stroke-width:1.5px;
-    class UI,API,WORKER,GRAPH,GLM,DB,FILES,BASE,WT base;
+    class UI,API,WORKER,GLM,DB,FILES,BASE,WT base;
     class GRAPH tool;
     style FRONT fill:#F5F7FA,stroke:#C6CDD5
     style BACK fill:#F5F7FA,stroke:#C6CDD5
     style MODEL fill:#F5F7FA,stroke:#C6CDD5
-    style LOCAL fill:#F5F7FA,stroke:#C6CDD5
+    style DATA fill:#F5F7FA,stroke:#C6CDD5
+    style REPO fill:#F5F7FA,stroke:#C6CDD5
